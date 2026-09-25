@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health & Fitness Widget</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .widget-container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 340px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+            text-align: center;
+            font-size: 20px;
+        }
+        .metric-card {
+            background: #f9f9f9;
+            padding: 10px 12px;
+            margin: 8px 0;
+            border-radius: 10px;
+            border-left: 5px solid #4CAF50;
+        }
+        .metric-card.bp { border-left-color: #2196F3; }
+        .metric-card.water { border-left-color: #00bcd4; }
+        .metric-card.active { border-left-color: #ff9800; }
+
+        .metric-title {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 3px;
+        }
+        .metric-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #222;
+        }
+        .input-section {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border-top: 1px solid #eee;
+            padding-top: 12px;
+        }
+        .input-row {
+            display: flex;
+            gap: 5px;
+        }
+        input {
+            flex: 1;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+        button {
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 13px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background-color: #45a049; }
+        
+        .btn-bp { background-color: #2196F3; }
+        .btn-bp:hover { background-color: #0b7dda; }
+        
+        .btn-water { background-color: #00bcd4; }
+        .btn-water:hover { background-color: #0097a7; }
+
+        .btn-active { background-color: #ff9800; }
+        .btn-active:hover { background-color: #e68a00; }
+
+        .reset-btn {
+            background-color: #e74c3c;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .reset-btn:hover { background-color: #c0392b; }
+    </style>
+</head>
+<body>
+
+    <div class="widget-container">
+        <h2>Daily Health Tracker</h2>
+        
+        <!-- Metrics Display Cards -->
+        <div class="metric-card">
+            <div class="metric-title">🚶‍♂️ Daily Steps</div>
+            <div class="metric-value" id="display-steps">0 / 10,000</div>
+        </div>
+
+        <div class="metric-card bp">
+            <div class="metric-title">❤️ Blood Pressure</div>
+            <div class="metric-value" id="display-bp">--/-- mmHg</div>
+        </div>
+
+        <div class="metric-card water">
+            <div class="metric-title">💧 Water Intake</div>
+            <div class="metric-value" id="display-water">0 Glasses</div>
+        </div>
+
+        <div class="metric-card active">
+            <div class="metric-title">🔥 Active Minutes</div>
+            <div class="metric-value" id="display-active">0 Mins</div>
+        </div>
+
+        <!-- Input Controls -->
+        <div class="input-section">
+            <div class="input-row">
+                <input type="number" id="step-input" placeholder="Add steps">
+                <button onclick="updateSteps()">+ Steps</button>
+            </div>
+            
+            <div class="input-row">
+                <input type="text" id="bp-input" placeholder="BP (e.g. 120/80)">
+                <button class="btn-bp" onclick="updateBP()">Set BP</button>
+            </div>
+
+            <div class="input-row">
+                <input type="number" id="water-input" placeholder="Glasses">
+                <button class="btn-water" onclick="updateWater()">+ Water</button>
+            </div>
+
+            <div class="input-row">
+                <input type="number" id="active-input" placeholder="Mins">
+                <button class="btn-active" onclick="updateActive()">+ Active</button>
+            </div>
+
+            <button class="reset-btn" onclick="resetDay()">Reset Daily Data</button>
+        </div>
+    </div>
+
+    <script>
+        // Load saved data or set defaults
+        let healthData = JSON.parse(localStorage.getItem('healthData')) || {
+            steps: 0,
+            bp: '--/--',
+            water: 0,
+            activeMinutes: 0
+        };
+
+        // Display data on load
+        function renderData() {
+            document.getElementById('display-steps').innerText = `${healthData.steps.toLocaleString()} / 10,000`;
+            document.getElementById('display-bp').innerText = `${healthData.bp} mmHg`;
+            document.getElementById('display-water').innerText = `${healthData.water} Glasses`;
+            document.getElementById('display-active').innerText = `${healthData.activeMinutes} Mins`;
+        }
+
+        function saveData() {
+            localStorage.setItem('healthData', JSON.stringify(healthData));
+            renderData();
+        }
+
+        function updateSteps() {
+            const val = parseInt(document.getElementById('step-input').value);
+            if (!isNaN(val)) {
+                healthData.steps += val;
+                document.getElementById('step-input').value = '';
+                saveData();
+            }
+        }
+
+        function updateBP() {
+            const val = document.getElementById('bp-input').value.trim();
+            if (val !== "") {
+                healthData.bp = val;
+                document.getElementById('bp-input').value = '';
+                saveData();
+            }
+        }
+
+        function updateWater() {
+            const val = parseInt(document.getElementById('water-input').value);
+            if (!isNaN(val)) {
+                healthData.water += val;
+                document.getElementById('water-input').value = '';
+                saveData();
+            }
+        }
+
+        function updateActive() {
+            const val = parseInt(document.getElementById('active-input').value);
+            if (!isNaN(val)) {
+                healthData.activeMinutes += val;
+                document.getElementById('active-input').value = '';
+                saveData();
+            }
+        }
+
+        function resetDay() {
+            if (confirm("Are you sure you want to reset your daily tracking data?")) {
+                healthData = { steps: 0, bp: '--/--', water: 0, activeMinutes: 0 };
+                saveData();
+            }
+        }
+
+        // Run on initial load
+        renderData();
+    </script>
+
+</body>
+</html>
